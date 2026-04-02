@@ -13,6 +13,12 @@ use serde::{Deserialize, Serialize};
 // closely represents the algorithm that was used by Anki before the switch to FSRS
 // NOTE: may switch to FSRS depending on how this implementation goes
 
+const INITIAL_INTERVAL_DAYS: f64 = 1.0;
+const INITIAL_EASE: f64 = 2.5;
+const MIN_EASE: f64 = 1.5;
+const EASE_BONUS_GOOD: f64 = 0.1;
+const EASE_PENALTY_AGAIN: f64 = 0.3;
+
 /// rating is calculated via constants EASE_BONUS_GOOD and EASE_PENALTY_AGAIN
 /// when rated Good, will add EASE_BONUS_GOOD to current ease, and get the minimum between current
 /// ease and 3.5
