@@ -24,6 +24,18 @@ pub enum Rating {
     Again,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Card {
-    // TODO: card details
+    /// problem directory name, e.g. "0001-two-sum"
+    pub problem: String,
+    /// current interval in days
+    pub interval: f64,
+    /// ease factor
+    pub ease: f64,
+    /// next review date
+    pub due: NaiveDate,
+    /// total number of reviews
+    pub reviews: u32,
+    /// consecutive "Good" streak, resetting on "Again"
+    pub streak: u32,
 }
