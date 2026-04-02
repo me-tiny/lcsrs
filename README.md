@@ -7,6 +7,25 @@
 
 specifically for my workflow of [this leetcode script](http://github.com/me-tiny/leetcode), although modification to allow use on many different workflows is definitely on the cards if there's interest
 
+may also implement the whole script into lcsrs for ease of use
+
+## usage
+
+### cli commands
+
+```bash
+# TODO: haven't set in stone the exact commands, have a baseline but may change
+```
+
+## deck
+
+deck is imported from the solved problems in the `$LEETCODE_DIR/problems/`
+directory and is stored at `$LEETCODE_DIR/.lcsrs.json`
+
+when reviewing a problem, lcsrs will backup your current `sol.cpp` file at
+`$LEETCODE_DIR/.lcsrs/backups`, and the currently worked on `sol.cpp` file will
+be generated in `$LEETCODE_DIR/.lcsrs/active` with a clean template
+
 ## algorithm
 
 using an algorithm inspired by [SuperMemo 2](https://supermemo.com/english/ol/sm2.htm), which was used by Anki before the
@@ -74,12 +93,4 @@ streak += 1
 interval = 1
 ease = max(ease - 0.3, 1.5)
 streak = 0
-```
-
-## usage
-
-### cli commands
-
-```bash
-# TODO: haven't set in stone the exact commands, have a baseline but may change
 ```
