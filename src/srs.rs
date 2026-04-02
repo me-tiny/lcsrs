@@ -45,3 +45,57 @@ pub struct Card {
     /// consecutive "Good" streak, resetting on "Again"
     pub streak: u32,
 }
+
+impl Card {
+    /// create a new card with due date being today (utc)
+    pub fn new(problem: String) -> Self {
+        let due = Utc::now().date_naive();
+        Self {
+            problem,
+            interval: INITIAL_INTERVAL_DAYS,
+            ease: INITIAL_EASE,
+            due,
+            reviews: 0,
+            streak: 0,
+        }
+    }
+
+    /// days overdue; negative being not due yet
+    pub fn is_due(&self) -> bool {
+        Utc::now().date_naive() >= self.due
+    }
+
+    /// srs algorithm logic
+    /// Good:
+    ///     - increase streak by 1
+    ///     - multiply interval by current ease
+    ///     - ease set to min((ease + EASE_BONUS_GOOD), 3.5)
+    /// Again:
+    ///     - reset straek to 0
+    ///     - set interval to INITIAL_INTERVAL_DAYS
+    ///     - ease set to max((ease - EASE_PENALTY_AGAIN), MIN_EASE)
+    pub fn review(&mut self, rating: Rating) {
+        self.reviews += 1;
+
+        match rating {
+            Rating::Good => {
+                self.streak += 1;
+                self.interval *= self.ease;
+                self.ease = (self.ease + EASE_BONUS_GOOD).min(3.5);
+            }
+            Rating::Again => {
+                self.streak = 0;
+                self.interval = INITIAL_INTERVAL_DAYS;
+                self.ease = (self.ease - EASE_PENALTY_AGAIN).max(MIN_EASE);
+            }
+        }
+
+        let days = self.interval.ceil() as i64;
+        self.due = Utc::now().date_naive() + chrono::Duration::days(days);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // TODO:tests for srs.rs
+}
