@@ -41,3 +41,35 @@ impl Deck {
         todo!()
     }
 }
+
+fn generate_template() -> String {
+    r#"#include "lc.hpp"
+
+class Solution {
+  public:
+    // TODO: paste method signature here
+};
+
+int main() {
+    Solution s;
+
+    // test cases
+    // example:
+    //
+    // ordered:
+    //
+    // std::vector<int> t1{1, 2, 3, 1};
+    // expect(s.containsDuplicate(t1), true);
+    //
+    // unordered:
+    //
+    // std::vector<int> n1 = {2, 7, 11, 15};
+    // int t1 = 9;
+    // std::vector<int> e1 = {0, 1};
+    // expect_unordered(s.twoSum(n1, t1), e1);
+
+    return 0;
+}
+"#
+    .to_string()
+}
