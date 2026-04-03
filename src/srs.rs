@@ -60,9 +60,14 @@ impl Card {
         }
     }
 
-    /// days overdue; negative being not due yet
+    // true if due
     pub fn is_due(&self) -> bool {
         Utc::now().date_naive() >= self.due
+    }
+
+    /// days overdue; negative being not due yet
+    pub fn days_overdue(&self) -> i64 {
+        (Utc::now().date_naive() - self.due).num_days()
     }
 
     /// srs algorithm logic
