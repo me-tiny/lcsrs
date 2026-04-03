@@ -57,11 +57,9 @@ fn find_repo_root(start: &PathBuf) -> anyhow::Result<PathBuf> {
 
 fn most_recent_problem(root: &PathBuf) -> anyhow::Result<String> {
     // check if fd exists, otherwise fallback to find
-    let mut binding = Command::new("find");
-    let cmd = binding.args(["problems", "-name", "sol.cpp", "-printf", "%T@ %p\\n"]);
-
-    if which("fd").is_ok() {
-        let cmd = Command::new("fd").args([
+    let mut cmd = if which("fd").is_ok() {
+        let mut c = Command::new("fd");
+        c.args([
             "--glob",
             "sol.cpp",
             "problems",
@@ -70,7 +68,12 @@ fn most_recent_problem(root: &PathBuf) -> anyhow::Result<String> {
             "-c",
             "%Y.%09X %n",
         ]);
-    }
+        c
+    } else {
+        let mut c = Command::new("find");
+        c.args(["problems", "-name", "sol.cpp", "-printf", "%T@ %p\\n"]);
+        c
+    };
 
     let output = cmd.current_dir(root).output()?;
     let stdout = String::from_utf8(output.stdout)?;
