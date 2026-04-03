@@ -3,6 +3,7 @@ mod srs;
 
 use clap::{Parser, Subcommand};
 use deck::Deck;
+use srs::Rating;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use which::which;
@@ -106,6 +107,28 @@ fn open_editor(root: &Path, problem: &str) {
     let sol_path = root.join("problems").join(problem).join("sol.cpp");
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "nvim".to_string());
     let _ = Command::new(editor).arg(&sol_path).status();
+}
+
+fn rate_active(root: &Path, deck: &mut Deck, rating: Rating) -> anyhow::Result<()> {
+    let problem = deck::active_review(root)?
+        .ok_or_else(|| anyhow::anyhow!("no active review, run `lcsrs review first`"))?;
+
+    deck.rate(&problem, rating)?;
+    deck.save(root)?;
+    deck::finish_review(root)?;
+
+    let card = &deck.cards[deck.find(&problem).unwrap()];
+    let label = match rating {
+        Rating::Good => "\x1b[32mgood\x1b[0m",
+        Rating::Again => "\x1b[31magain\x1b[0m",
+    };
+    println!(
+        "{} '{}' - next review in {} day(s)",
+        label,
+        problem,
+        card.interval.ceil() as i64
+    );
+    Ok(())
 }
 
 fn main() -> anyhow::Result<()> {
