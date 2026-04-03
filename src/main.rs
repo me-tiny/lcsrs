@@ -215,7 +215,30 @@ fn main() -> anyhow::Result<()> {
         }
         Cmd::Good => rate_active(&root, &mut deck, Rating::Good)?,
         Cmd::Again => rate_active(&root, &mut deck, Rating::Again)?,
-        Cmd::Status => todo!(),
+        Cmd::Status => {
+            if deck.cards.is_empty() {
+                println!("deck is empty, add problems with `lcsrs add`");
+                return Ok(());
+            }
+
+            let mut cards = deck.cards.clone();
+            cards.sort_by_key(|c| c.due);
+
+            println!(
+                "{:<36} {:>8} {:>6} {:>8} {:>10}",
+                "problem", "interval", "ease", "streak", "due"
+            );
+            println!("{}", "-".repeat(72));
+
+            for card in &cards {
+                let due_str = card.due.format("%Y-%m-%d").to_string();
+                let marker = if card.is_due() { " <-" } else { "" };
+                println!(
+                    "{:<36} {:>7.0}d {:>6.2} {:>8} {:>10}{}",
+                    card.problem, card.interval, card.ease, card.streak, due_str, marker
+                );
+            }
+        }
         Cmd::Import => todo!(),
     }
 
