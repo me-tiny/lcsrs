@@ -114,6 +114,24 @@ fn most_recent_problem(root: &PathBuf) -> anyhow::Result<String> {
     Ok(problem.to_string())
 }
 
+fn discover_all_problems(root: &Path) -> anyhow::Result<Vec<String>> {
+    let problems_dir = root.join("problems");
+    let mut problems = Vec::new();
+    for entry in std::fs::read_dir(problems_dir)? {
+        let entry = entry?;
+        if entry.file_type()?.is_dir() {
+            let sol = entry.path().join("sol.cpp");
+            if sol.exists()
+                && let Some(name) = entry.file_name().to_str()
+            {
+                problems.push(name.to_string());
+            }
+        }
+    }
+    problems.sort();
+    Ok(problems)
+}
+
 fn open_editor(root: &Path, problem: &str) {
     let sol_path = root.join("problems").join(problem).join("sol.cpp");
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "nvim".to_string());
@@ -239,7 +257,21 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         }
-        Cmd::Import => todo!(),
+        Cmd::Import => {
+            let problems = discover_all_problems(&root)?;
+            let mut added = 0;
+            for p in &problems {
+                if deck.add(p.clone()) {
+                    added += 1;
+                }
+            }
+            deck.save(&root)?;
+            println!(
+                "imported {} new problem(s) ({} total in deck)",
+                added,
+                deck.cards.len()
+            );
+        }
     }
 
     Ok(())

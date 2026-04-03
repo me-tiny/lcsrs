@@ -30,7 +30,7 @@ pub enum Rating {
     Again,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Card {
     /// problem directory name, e.g. "0001-two-sum"
     pub problem: String,
