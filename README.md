@@ -14,7 +14,25 @@ may also implement the whole script into lcsrs for ease of use
 ### cli commands
 
 ```bash
-# TODO: haven't set in stone the exact commands, have a baseline but may change
+# add to deck
+lcsrs add # adds most recently edited sol.cpp
+lcsrs add 0001-two-sum # add specific problem
+
+# lists problems due for review
+lcsrs due
+
+# starts review session
+lcsrs review # most overdue card
+lcsrs review 0001-two-sum # review specific card
+
+# rates current review
+lcsrs [good/again]
+
+# shows all problems
+lcsrs status
+
+# import all problems into deck
+lcsrs import
 ```
 
 ## deck
