@@ -3,7 +3,7 @@ mod srs;
 
 use clap::{Parser, Subcommand};
 use deck::Deck;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use which::which;
 
@@ -146,7 +146,39 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        Cmd::Review { problem } => todo!(),
+        Cmd::Review { problem } => {
+            // need to check if there's already an active review
+            if let Some(active) = deck::active_review(&root)? {
+                println!(
+                    "review already in progress: {}\n\
+                finish it with `lcsrs good` or `lcsrs again`",
+                    active
+                );
+                return Ok(());
+            }
+
+            let problem = match problem {
+                Some(p) => p,
+                None => {
+                    let due = deck.due_cards();
+                    match due.first() {
+                        Some(card) => card.problem.clone(),
+                        None => {
+                            println!("nothing due, all caught up");
+                            return Ok(());
+                        }
+                    }
+                }
+            };
+
+            deck::begin_review(&root, &problem)?;
+            println!(
+                "\x1b[33m⟳\x1b[0m reviewing '{}' — sol.cpp cleared (backup saved)",
+                problem
+            );
+            println!("  solve it, then run `lcsrs good` or `lcsrs again`");
+            open_editor(&root, &problem);
+        }
         Cmd::Good => todo!(),
         Cmd::Again => todo!(),
         Cmd::Status => todo!(),
