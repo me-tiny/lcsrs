@@ -16,12 +16,13 @@ use serde::{Deserialize, Serialize};
 const INITIAL_INTERVAL_DAYS: f64 = 1.0;
 const INITIAL_EASE: f64 = 2.5;
 const MIN_EASE: f64 = 1.5;
+const MAX_EASE: f64 = 3.5;
 const EASE_BONUS_GOOD: f64 = 0.1;
 const EASE_PENALTY_AGAIN: f64 = 0.3;
 
 /// rating is calculated via constants EASE_BONUS_GOOD and EASE_PENALTY_AGAIN
 /// when rated Good, will add EASE_BONUS_GOOD to current ease, and get the minimum between current
-/// ease and 3.5
+/// ease and MAX_EASE
 /// when rated Again, will minus EASE_PENALTY_AGAIN from current ease, and get the max between
 /// current ease and MIN_EASE
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
@@ -74,7 +75,7 @@ impl Card {
     /// Good:
     ///     - increase streak by 1
     ///     - multiply interval by current ease
-    ///     - ease set to min((ease + EASE_BONUS_GOOD), 3.5)
+    ///     - ease set to min((ease + EASE_BONUS_GOOD), MAX_EASE)
     /// Again:
     ///     - reset straek to 0
     ///     - set interval to INITIAL_INTERVAL_DAYS
@@ -86,7 +87,7 @@ impl Card {
             Rating::Good => {
                 self.streak += 1;
                 self.interval *= self.ease;
-                self.ease = (self.ease + EASE_BONUS_GOOD).min(3.5);
+                self.ease = (self.ease + EASE_BONUS_GOOD).min(MAX_EASE);
             }
             Rating::Again => {
                 self.streak = 0;
@@ -102,5 +103,38 @@ impl Card {
 
 #[cfg(test)]
 mod tests {
-    // TODO:tests for srs.rs
+    use super::*;
+
+    #[test]
+    fn good_increases_interval() {
+        let mut card = Card::new("0001-two-sum".into());
+        let initial = card.interval;
+        card.review(Rating::Good);
+        assert!(card.interval > initial);
+        assert_eq!(card.streak, 1);
+    }
+
+    #[test]
+    fn again_resets_interval() {
+        let mut card = Card::new("0001-two-sum".into());
+        card.review(Rating::Good);
+        card.review(Rating::Good);
+        card.review(Rating::Again);
+        assert!((card.interval - INITIAL_INTERVAL_DAYS).abs() < f64::EPSILON);
+        assert_eq!(card.streak, 0);
+    }
+
+    #[test]
+    fn ease_stays_in_bounds() {
+        let mut card = Card::new("0001-two-sum".into());
+        for _ in 0..50 {
+            card.review(Rating::Again);
+        }
+        assert!(card.ease >= MIN_EASE);
+
+        for _ in 0..50 {
+            card.review(Rating::Good);
+        }
+        assert!(card.ease <= MAX_EASE);
+    }
 }
