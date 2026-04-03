@@ -19,6 +19,7 @@ const MIN_EASE: f64 = 1.5;
 const MAX_EASE: f64 = 3.5;
 const EASE_BONUS_GOOD: f64 = 0.1;
 const EASE_PENALTY_AGAIN: f64 = 0.3;
+const MAX_INTERVAL_DAYS: f64 = 365.0;
 
 /// rating is calculated via constants EASE_BONUS_GOOD and EASE_PENALTY_AGAIN
 /// when rated Good, will add EASE_BONUS_GOOD to current ease, and get the minimum between current
@@ -86,7 +87,7 @@ impl Card {
         match rating {
             Rating::Good => {
                 self.streak += 1;
-                self.interval *= self.ease;
+                self.interval = (self.interval * self.ease).min(MAX_INTERVAL_DAYS);
                 self.ease = (self.ease + EASE_BONUS_GOOD).min(MAX_EASE);
             }
             Rating::Again => {
