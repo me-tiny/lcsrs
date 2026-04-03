@@ -102,6 +102,12 @@ fn most_recent_problem(root: &PathBuf) -> anyhow::Result<String> {
     Ok(problem.to_string())
 }
 
+fn open_editor(root: &Path, problem: &str) {
+    let sol_path = root.join("problems").join(problem).join("sol.cpp");
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| "nvim".to_string());
+    let _ = Command::new(editor).arg(&sol_path).status();
+}
+
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let root = find_repo_root(&cli.root)?;
