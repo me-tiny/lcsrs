@@ -6,7 +6,7 @@ const DECK_FILE: &str = ".lcsrs.json";
 const BACKUP_DIR: &str = ".lcsrs/backups";
 const ACTIVE_FILE: &str = ".lcsrs/active";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Deck {
     pub cards: Vec<Card>,
 }
@@ -14,31 +14,50 @@ pub struct Deck {
 impl Deck {
     /// resolve deck file path
     fn deck_path(root: &Path) -> PathBuf {
-        todo!()
+        root.join(DECK_FILE)
     }
     /// load deck if it exists
     pub fn load(root: &Path) -> anyhow::Result<Self> {
-        todo!()
+        let path = Self::deck_path(root);
+        if !path.exists() {
+            return Ok(Self::default());
+        }
+        let data = std::fs::read_to_string(&path)?;
+        let deck: Deck = serde_json::from_str(&data)?;
+        Ok(deck)
     }
     /// save deck to json file
     pub fn save(&self, root: &Path) -> anyhow::Result<()> {
-        todo!()
+        let path = Self::deck_path(root);
+        let data = serde_json::to_string_pretty(self)?;
+        std::fs::write(path, data)?;
+        Ok(())
     }
     /// find problem in deck
     pub fn find(&self, problem: &str) -> Option<usize> {
-        todo!()
+        self.cards.iter().position(|c| c.problem == problem)
     }
     /// add card to deck if it doesn't exist already
     pub fn add(&mut self, problem: String) -> bool {
-        todo!()
+        if self.find(&problem).is_some() {
+            return false;
+        }
+        self.cards.push(Card::new(problem));
+        true
     }
     /// get list of due cards
     pub fn due_cards(&self) -> Vec<&Card> {
-        todo!()
+        let mut due: Vec<&Card> = self.cards.iter().filter(|c| c.is_due()).collect();
+        due.sort_by_key(|b| std::cmp::Reverse(b.days_overdue()));
+        due
     }
     /// rate card and update it's interval
     pub fn rate(&mut self, problem: &str, rating: Rating) -> anyhow::Result<()> {
-        todo!()
+        let i = self
+            .find(problem)
+            .ok_or_else(|| anyhow::anyhow!("problem {} not in deck", problem))?;
+        self.cards[i].review(rating);
+        Ok(())
     }
 }
 
