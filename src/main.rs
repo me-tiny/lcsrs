@@ -120,7 +120,26 @@ fn main() -> anyhow::Result<()> {
                 println!("{} is already in deck", problem);
             }
         }
-        Cmd::Due => todo!(),
+        Cmd::Due => {
+            let due = deck.due_cards();
+            if due.is_empty() {
+                println!("nothing due, all caught up");
+            } else {
+                println!("{} problem(s) due for review:\n", due.len());
+                for card in &due {
+                    let overdue = card.days_overdue();
+                    let overdue_str = if overdue > 0 {
+                        format!(" \x1b[31m({}d overdue)\x1b[0m", overdue)
+                    } else {
+                        " \x1b[33m(due today)\x1b[0m".to_string()
+                    };
+                    println!(
+                        "  {} — streak: {}, reviews: {}{}",
+                        card.problem, card.streak, card.reviews, overdue_str
+                    );
+                }
+            }
+        }
         Cmd::Review { problem } => todo!(),
         Cmd::Good => todo!(),
         Cmd::Again => todo!(),
