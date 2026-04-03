@@ -61,6 +61,16 @@ impl Deck {
     }
 }
 
+/// reads which problem is currently being reviewed
+pub fn active_review(root: &Path) -> anyhow::Result<Option<String>> {
+    let active_path = root.join(ACTIVE_FILE);
+    if !active_path.exists() {
+        return Ok(None);
+    }
+    let problem = std::fs::read_to_string(&active_path)?.trim().to_string();
+    Ok(Some(problem))
+}
+
 fn generate_template() -> String {
     r#"#include "lc.hpp"
 
