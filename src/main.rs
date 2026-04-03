@@ -202,8 +202,8 @@ fn main() -> anyhow::Result<()> {
             println!("  solve it, then run `lcsrs good` or `lcsrs again`");
             open_editor(&root, &problem);
         }
-        Cmd::Good => todo!(),
-        Cmd::Again => todo!(),
+        Cmd::Good => rate_active(&root, &mut deck, Rating::Good)?,
+        Cmd::Again => rate_active(&root, &mut deck, Rating::Again)?,
         Cmd::Status => todo!(),
         Cmd::Import => todo!(),
     }
