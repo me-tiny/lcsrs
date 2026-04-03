@@ -61,6 +61,31 @@ impl Deck {
     }
 }
 
+/// backup sol.cpp and replace w/ empty template
+pub fn begin_review(root: &Path, problem: &str) -> anyhow::Result<()> {
+    let sol_path = root.join("problems").join(problem).join("sol.cpp");
+    if !sol_path.exists() {
+        anyhow::bail!("no sol.cpp found at {}", sol_path.display());
+    }
+
+    // create backup dir, and backup current sol.cpp
+    let backup_dir = root.join(BACKUP_DIR).join(problem);
+    std::fs::create_dir_all(&backup_dir)?;
+    let backup_path = backup_dir.join("sol.cpp");
+    std::fs::copy(&sol_path, &backup_path)?;
+
+    // write template
+    let template = generate_template();
+    std::fs::write(&sol_path, template)?;
+
+    // set active review
+    let active_path = root.join(ACTIVE_FILE);
+    std::fs::create_dir_all(active_path.parent().unwrap())?;
+    std::fs::write(&active_path, problem)?;
+
+    Ok(())
+}
+
 /// reads which problem is currently being reviewed
 pub fn active_review(root: &Path) -> anyhow::Result<Option<String>> {
     let active_path = root.join(ACTIVE_FILE);
@@ -69,6 +94,15 @@ pub fn active_review(root: &Path) -> anyhow::Result<Option<String>> {
     }
     let problem = std::fs::read_to_string(&active_path)?.trim().to_string();
     Ok(Some(problem))
+}
+
+/// clear active review marker
+pub fn finish_review(root: &Path) -> anyhow::Result<()> {
+    let active_path = root.join(ACTIVE_FILE);
+    if active_path.exists() {
+        std::fs::remove_file(&active_path)?;
+    }
+    Ok(())
 }
 
 fn generate_template() -> String {
